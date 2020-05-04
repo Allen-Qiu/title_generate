@@ -11,6 +11,7 @@ from tensorflow.keras import backend as K
 import tensorflow as tf
 import pickle
 from title_parameters import Hyparameters as hp
+from title_dataset import TitleDataset
 
 with open('titledataset.pkl', 'rb') as f:
     dataset = pickle.load(f)
@@ -62,11 +63,9 @@ loss=tf.keras.losses.SparseCategoricalCrossentropy()
 model.compile(optimizer='adam', 
               loss=loss, 
               metrics=['sparse_categorical_accuracy'])
-model.fit(inputs=[dataset.encoder_input_train, dataset.decoder_input_train], 
-          outputs=dataset.decoder_target_train,
-          batch_size=hp.batch_size,
-          epochs=hp.epochs,
-          verbose=1)
+model.fit([dataset.encoder_input_train, dataset.decoder_input_train], 
+          dataset.decoder_target_train,
+          batch_size=hp.batch_size, epochs=hp.epochs, verbose=1)
 
 # inference encoder model
 encoder_model=Model(inputs=encoder_inputs, outputs=[encoder_outputs,encoder_states])
@@ -81,21 +80,18 @@ encoder_outputs_infer = Input(shape=(hp.encoder_time_steps,
                               name='einput')
 
 decoder_input_embed_infer = embed(decoder_inputs_infer)
-c_infer = K.mean(encoder_outputs_infer, axis=1)
-expanded_c_infer=K.expand_dims(c_infer,axis=1)
-
 temp_infer = attention_layer(encoder_outputs_infer)
 t_infer = tf.transpose(temp_infer,[0,2,1])
-state_infer=decoder_state_infer
+expanded_s_tm1_infer=K.expand_dims(decoder_state_infer,axis=1)
+E_infer = tf.matmul(expanded_s_tm1_infer,t_infer)
+alpha_infer = K.softmax(E_infer)
+expanded_c_infer = tf.matmul(alpha_infer, encoder_outputs_infer)
 
 one_decoder_input_infer = K.concatenate([decoder_input_embed_infer,
                                          expanded_c_infer], axis=-1)
 one_output_infer,state_infer = decoder(one_decoder_input_infer, 
-                                       initial_state=state_infer)
-expanded_s_tm1_infer=K.expand_dims(state_infer,axis=1)
-E_infer = tf.matmul(expanded_s_tm1_infer,t_infer)
-alpha_infer = K.softmax(E_infer)
-expanded_c_infer = tf.matmul(alpha_infer, encoder_outputs_infer)
+                                       initial_state=decoder_state_infer)
+
 decoder_outputs_infer=K.expand_dims(one_output_infer,axis=1)
 
 output_layer_infer = decoder_dense(decoder_outputs_infer)

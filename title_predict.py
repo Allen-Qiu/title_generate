@@ -30,12 +30,10 @@ def decode_sequence(input_seq):
             [target_seq, decoder_state, encoder_outputs])
 
         target_seq=outputs
-        sampled_char = dataset.dic_index_token[outputs[0,0]]
-        decoded_sentence.append(sampled_char)
+        token = dataset.dic_index_token[outputs[0,0]]
+        decoded_sentence.append(token)
 
-        # Exit condition: either hit max length
-        # or find stop character.
-        if (sampled_char == '<end>' or
+        if (token == '<end>' or
            len(decoded_sentence) > hp.max_decoder_seq_length):
             stop_condition = True
 
@@ -54,4 +52,12 @@ for idx in sampled_idx:
     print(get_original_title(dataset.decoder_input_dev [idx]))
     print('Decoded sentence:', decoded_sentence)
 
+# explore fittness of model
+sampled_idx=random.sample(range(len(dataset.encoder_input_train)),5)
+for idx in sampled_idx:
+    input_seq = dataset.encoder_input_train [idx: idx + 1]
+    decoded_sentence = decode_sequence(input_seq)
+    print('-')
+    print(get_original_title(dataset.decoder_input_train [idx]))
+    print('Decoded sentence:', decoded_sentence)
 
