@@ -19,17 +19,18 @@ decoder_model=load_model('decoder.h5')
 # predict
 def decode_sequence(input_seq):
     encoder_outputs,encoder_state = encoder_model.predict(input_seq)
-    target_seq = dataset.dic_token_index['<start>']
+    decoder_input_seq = dataset.dic_token_index['<start>']
     stop_condition = False
     decoded_sentence = []
     decoder_state = encoder_state
-    target_seq=np.array([[target_seq]])
+    decoder_input_seq=np.array([[decoder_input_seq]])
     
     while not stop_condition:
         outputs, decoder_state = decoder_model.predict(
-            [target_seq, decoder_state, encoder_outputs])
+            [decoder_input_seq, decoder_state, encoder_outputs])
 
-        target_seq=outputs
+        decoder_input_seq=outputs
+        if outputs[0,0]==0: break
         token = dataset.dic_index_token[outputs[0,0]]
         decoded_sentence.append(token)
 
