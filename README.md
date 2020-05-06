@@ -1,6 +1,6 @@
 # title_generate
-This is an example for using tf.keras build an encoder-decoder model with attention mechanism to generate title from the abstract.
-If you wanna get better performance, I suggest to augment dataset, even build the pre-trained word embeddings from the specific domain. 
+This is an example of using tf.keras to build an encoder-decoder model with attention mechanism to generate the title from the abstract.
+If you want to get better performance, I suggest to augment the dataset, even build the pre-trained word embeddings from the specific domain. 
 
 title_parameter.py  reserves the hyper-parameters
 
