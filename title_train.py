@@ -51,7 +51,7 @@ for i in range(times):
     E = tf.matmul(expanded_s_tm1,t)
     alpha = K.softmax(E)
     c = tf.matmul(alpha, encoder_outputs)
-
+    expanded_c=K.expand_dims(c,axis=1)
     decoder_outputs.append(K.expand_dims(one_output,axis=1))
 
 concat_decoder_outputs=Concatenate(axis=1)(decoder_outputs)    
